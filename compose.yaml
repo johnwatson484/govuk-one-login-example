@@ -1,0 +1,22 @@
+services:
+  hapi-template-ts:
+    profiles:
+      - app
+    build:
+      context: .
+      target: development
+    ports:
+      - '3000:3000'
+      - '9229:9229'
+    volumes:
+      - ./src:/home/node/src
+      - ./package.json:/home/node/package.json
+    env_file:
+      - .env
+    networks:
+      - hapi-template-ts
+
+networks:
+  hapi-template-ts:
+    driver: bridge
+    name: hapi-template-ts

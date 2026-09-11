@@ -1,0 +1,15 @@
+.DS_Store
+.npm/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+.idea
+node_modules
+npm-debug.log
+coverage
+.cache
+.eslintcache
+.envrc
+tsconfig.tsbuildinfo
+.env
+.sonarlint/
