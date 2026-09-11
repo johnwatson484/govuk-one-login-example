@@ -1,0 +1,48 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+
+{% set pageTitle = 'How can we contact you?' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors %}
+        {{ govukErrorSummary({ titleText: "There is a problem", errorList: errors.errorList }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">How can we contact you?</h1>
+
+      <form method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+
+        {{ govukInput({
+          label: { text: "Email address" },
+          hint: { text: "We have used the email address from your GOV.UK One Login. You can change it." },
+          id: "email",
+          name: "email",
+          type: "email",
+          spellcheck: false,
+          autocomplete: "email",
+          value: values.email,
+          errorMessage: errors.fields.email if errors
+        }) }}
+
+        {{ govukInput({
+          label: { text: "Telephone number (optional)" },
+          id: "telephone",
+          name: "telephone",
+          type: "tel",
+          classes: "govuk-input--width-20",
+          autocomplete: "tel",
+          value: values.telephone,
+          errorMessage: errors.fields.telephone if errors
+        }) }}
+
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

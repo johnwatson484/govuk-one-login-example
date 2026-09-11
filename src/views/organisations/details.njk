@@ -1,0 +1,84 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+
+{% set pageTitle = organisation.name %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-l">Farming business</span>
+      <h1 class="govuk-heading-l">{{ organisation.name }}</h1>
+
+      {% set addressLines = [] %}
+      {% for line in [organisation.addressLine1, organisation.addressLine2, organisation.town, organisation.county, organisation.postcode] %}
+        {% if line %}{% set addressLines = (addressLines.push(line), addressLines) %}{% endif %}
+      {% endfor %}
+
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Single business identifier (SBI)" }, value: { text: organisation.sbi } },
+          { key: { text: "Address" }, value: { html: addressLines | join("<br>") if addressLines.length else "Not provided" } },
+          { key: { text: "Your permission" }, value: { text: "Owner" if organisation.permission == "owner" else "Member" } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-m">People in this business</h2>
+
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-visually-hidden">People linked to this business</caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Name</th>
+            <th scope="col" class="govuk-table__header">Email address</th>
+            <th scope="col" class="govuk-table__header">Permission</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for member in people %}
+            <tr class="govuk-table__row">
+              <td class="govuk-table__cell">{{ member.givenName }} {{ member.familyName }}</td>
+              <td class="govuk-table__cell">{{ member.email }}</td>
+              <td class="govuk-table__cell">
+                {% if member.permission == "owner" %}
+                  {{ govukTag({ text: "Owner" }) }}
+                {% else %}
+                  {{ govukTag({ text: "Member", classes: "govuk-tag--grey" }) }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% if organisation.permission == "owner" %}
+        {% if invitations.length %}
+          <h2 class="govuk-heading-m">Pending invitations</h2>
+          <table class="govuk-table">
+            <caption class="govuk-table__caption govuk-visually-hidden">Invitations that have not been accepted</caption>
+            <thead class="govuk-table__head">
+              <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Email address</th>
+                <th scope="col" class="govuk-table__header">Permission</th>
+                <th scope="col" class="govuk-table__header">Expires</th>
+              </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+              {% for invitation in invitations %}
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell">{{ invitation.email }}</td>
+                  <td class="govuk-table__cell">{{ "Owner" if invitation.permission == "owner" else "Member" }}</td>
+                  <td class="govuk-table__cell">{{ invitation.expiresAt | date }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+
+        {{ govukButton({ text: "Invite someone", href: "/organisations/" + organisation.id + "/invite" }) }}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

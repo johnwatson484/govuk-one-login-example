@@ -1,10 +1,29 @@
 {% extends '_layout.njk' %}
 
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = 'Manage your farming business' %}
+
 {% block content %}
-  <section class="hero">
-    <div class="hero-body">
-      <p class="title">Hello world!</p>
-      <p class="subtitle">Welcome to {{ appName }}</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">{{ serviceName }}</h1>
+
+      <p class="govuk-body">Use this service to:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>create a farming business account</li>
+        <li>see the businesses you are linked to and your permissions</li>
+        <li>invite other people to a business you own</li>
+      </ul>
+
+      <h2 class="govuk-heading-m">Before you start</h2>
+      <p class="govuk-body">You need a GOV.UK One Login. If you do not have one, you can create one when you sign in.</p>
+
+      {{ govukButton({
+        text: "Start now",
+        href: "/auth/sign-in",
+        isStartButton: true
+      }) }}
     </div>
-  </section>
+  </div>
 {% endblock %}

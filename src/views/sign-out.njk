@@ -1,0 +1,22 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = 'Are you sure you want to sign out?' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Are you sure you want to sign out?</h1>
+      <p class="govuk-body">You will also be signed out of GOV.UK One Login.</p>
+
+      <form method="post" action="/sign-out" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+        <div class="govuk-button-group">
+          {{ govukButton({ text: "Sign out" }) }}
+          <a class="govuk-link" href="/organisations">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

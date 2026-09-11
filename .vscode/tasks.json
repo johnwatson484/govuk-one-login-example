@@ -2,11 +2,34 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Local",
+      "detail": "Generate dev keys, start dependencies, then run the app",
+      "type": "npm",
+      "script": "local",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
       "label": "Dev",
-      "detail": "Run app locally with hot reload",
+      "detail": "Run app locally with hot reload (requires Services: Up)",
       "type": "npm",
       "script": "dev",
       "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Services: Up",
+      "detail": "Start PostgreSQL, Redis and the One Login simulator, then migrate",
+      "type": "npm",
+      "script": "services:up",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Services: Down",
+      "detail": "Stop the dependency containers",
+      "type": "npm",
+      "script": "services:down",
       "problemMatcher": []
     },
     {
@@ -25,14 +48,6 @@
       "detail": "Run tests in watch mode",
       "type": "npm",
       "script": "test:watch",
-      "isBackground": true,
-      "problemMatcher": []
-    },
-    {
-      "label": "Docker: Dev (together)",
-      "detail": "Build and run in Docker (use with the orchestration repo)",
-      "type": "npm",
-      "script": "docker:dev",
       "isBackground": true,
       "problemMatcher": []
     }

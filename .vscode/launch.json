@@ -25,17 +25,6 @@
       "env": { "TZ": "UTC", "NODE_ENV": "test" },
       "skipFiles": ["<node_internals>/**"],
       "smartStep": true
-    },
-    {
-      "name": "Docker: Attach to App (together)",
-      "type": "node",
-      "request": "attach",
-      "address": "localhost",
-      "port": 9229,
-      "localRoot": "${workspaceFolder}",
-      "remoteRoot": "/home/node",
-      "restart": true,
-      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

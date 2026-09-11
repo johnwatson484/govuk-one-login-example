@@ -1,0 +1,14 @@
+{% extends '_layout.njk' %}
+
+{% set pageTitle = 'We could not sign you in' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">We could not sign you in</h1>
+      <p class="govuk-body">Something went wrong while we were checking your GOV.UK One Login details.</p>
+      <p class="govuk-body">This can happen if you took too long, or if you used a link from an old browser tab.</p>
+      <p class="govuk-body"><a class="govuk-link" href="/">Try signing in again</a></p>
+    </div>
+  </div>
+{% endblock %}

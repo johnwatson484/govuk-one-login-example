@@ -1,0 +1,30 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set pageTitle = 'Join ' + invitation.organisationName %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Join {{ invitation.organisationName }}</h1>
+
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Business" }, value: { text: invitation.organisationName } },
+          { key: { text: "Your permission would be" }, value: { text: "Owner" if invitation.permission == "owner" else "Member" } },
+          { key: { text: "Invitation expires" }, value: { text: invitation.expiresAt | date } }
+        ]
+      }) }}
+
+      <form method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+        <div class="govuk-button-group">
+          {{ govukButton({ text: "Accept invitation" }) }}
+          <a class="govuk-link" href="/organisations">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

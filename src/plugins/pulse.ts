@@ -1,5 +1,5 @@
 import hapiPulse from 'hapi-pulse'
-import config from '../config.ts'
+import config from '../config/index.ts'
 import logger from '../logger.ts'
 
 const tenSeconds = 10 * 1000

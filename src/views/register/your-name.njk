@@ -1,0 +1,44 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+
+{% set pageTitle = 'What is your name?' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors %}
+        {{ govukErrorSummary({ titleText: "There is a problem", errorList: errors.errorList }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">What is your name?</h1>
+      <p class="govuk-body">We use your name on your farming business records.</p>
+
+      <form method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+
+        {{ govukInput({
+          label: { text: "First name" },
+          id: "givenName",
+          name: "givenName",
+          autocomplete: "given-name",
+          value: values.givenName,
+          errorMessage: errors.fields.givenName if errors
+        }) }}
+
+        {{ govukInput({
+          label: { text: "Last name" },
+          id: "familyName",
+          name: "familyName",
+          autocomplete: "family-name",
+          value: values.familyName,
+          errorMessage: errors.fields.familyName if errors
+        }) }}
+
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

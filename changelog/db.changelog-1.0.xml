@@ -1,0 +1,237 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+
+  <changeSet author="Defra" id="1">
+    <tagDatabase tag="v1.0.0" />
+  </changeSet>
+
+  <changeSet author="Defra" id="2">
+    <comment>A person is the service's own record of a human being. It is never keyed on the One Login subject.</comment>
+    <createTable tableName="person">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="person_pkey" />
+      </column>
+      <column name="given_name" type="VARCHAR(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="family_name" type="VARCHAR(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="email" type="VARCHAR(320)">
+        <constraints nullable="false" />
+      </column>
+      <column name="telephone" type="VARCHAR(30)" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
+        <constraints nullable="false" />
+      </column>
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="Defra" id="3">
+    <comment>Links a person to an identity provider subject. The unique constraint stops the same GOV.UK One Login account registering twice.</comment>
+    <createTable tableName="external_identity">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="external_identity_pkey" />
+      </column>
+      <column name="person_id" type="UUID">
+        <constraints nullable="false" />
+      </column>
+      <column name="issuer" type="VARCHAR(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="subject" type="VARCHAR(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addForeignKeyConstraint
+      baseTableName="external_identity"
+      baseColumnNames="person_id"
+      constraintName="external_identity_person_id_fkey"
+      referencedTableName="person"
+      referencedColumnNames="id"
+      onDelete="CASCADE" />
+    <addUniqueConstraint
+      tableName="external_identity"
+      columnNames="issuer, subject"
+      constraintName="external_identity_issuer_subject_key" />
+  </changeSet>
+
+  <changeSet author="Defra" id="4">
+    <comment>A farming business. The single business identifier is unique so the same business cannot be created twice.</comment>
+    <createTable tableName="organisation">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="organisation_pkey" />
+      </column>
+      <column name="name" type="VARCHAR(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="sbi" type="VARCHAR(9)">
+        <constraints nullable="false" />
+      </column>
+      <column name="address_line_1" type="VARCHAR(255)" />
+      <column name="address_line_2" type="VARCHAR(255)" />
+      <column name="town" type="VARCHAR(255)" />
+      <column name="county" type="VARCHAR(255)" />
+      <column name="postcode" type="VARCHAR(10)" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
+        <constraints nullable="false" />
+      </column>
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addUniqueConstraint
+      tableName="organisation"
+      columnNames="sbi"
+      constraintName="organisation_sbi_key" />
+  </changeSet>
+
+  <changeSet author="Defra" id="5">
+    <comment>Membership of a business, carrying the person's permission level within it.</comment>
+    <createTable tableName="organisation_person">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="organisation_person_pkey" />
+      </column>
+      <column name="organisation_id" type="UUID">
+        <constraints nullable="false" />
+      </column>
+      <column name="person_id" type="UUID">
+        <constraints nullable="false" />
+      </column>
+      <column name="permission" type="VARCHAR(10)">
+        <constraints nullable="false" />
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addForeignKeyConstraint
+      baseTableName="organisation_person"
+      baseColumnNames="organisation_id"
+      constraintName="organisation_person_organisation_id_fkey"
+      referencedTableName="organisation"
+      referencedColumnNames="id"
+      onDelete="CASCADE" />
+    <addForeignKeyConstraint
+      baseTableName="organisation_person"
+      baseColumnNames="person_id"
+      constraintName="organisation_person_person_id_fkey"
+      referencedTableName="person"
+      referencedColumnNames="id"
+      onDelete="CASCADE" />
+    <addUniqueConstraint
+      tableName="organisation_person"
+      columnNames="organisation_id, person_id"
+      constraintName="organisation_person_organisation_id_person_id_key" />
+    <createIndex tableName="organisation_person" indexName="organisation_person_person_id_idx">
+      <column name="person_id" />
+    </createIndex>
+    <sql>
+      ALTER TABLE organisation_person
+      ADD CONSTRAINT organisation_person_permission_check
+      CHECK (permission IN ('owner', 'member'));
+    </sql>
+  </changeSet>
+
+  <changeSet author="Defra" id="6">
+    <comment>Only the SHA-256 hash of an invitation token is stored, so a database read cannot be replayed as an invitation link.</comment>
+    <createTable tableName="invitation">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="invitation_pkey" />
+      </column>
+      <column name="organisation_id" type="UUID">
+        <constraints nullable="false" />
+      </column>
+      <column name="invited_by_person_id" type="UUID">
+        <constraints nullable="false" />
+      </column>
+      <column name="email" type="VARCHAR(320)">
+        <constraints nullable="false" />
+      </column>
+      <column name="permission" type="VARCHAR(10)">
+        <constraints nullable="false" />
+      </column>
+      <column name="token_hash" type="VARCHAR(64)">
+        <constraints nullable="false" />
+      </column>
+      <column name="expires_at" type="TIMESTAMP WITH TIME ZONE">
+        <constraints nullable="false" />
+      </column>
+      <column name="accepted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addForeignKeyConstraint
+      baseTableName="invitation"
+      baseColumnNames="organisation_id"
+      constraintName="invitation_organisation_id_fkey"
+      referencedTableName="organisation"
+      referencedColumnNames="id"
+      onDelete="CASCADE" />
+    <addForeignKeyConstraint
+      baseTableName="invitation"
+      baseColumnNames="invited_by_person_id"
+      constraintName="invitation_invited_by_person_id_fkey"
+      referencedTableName="person"
+      referencedColumnNames="id" />
+    <addUniqueConstraint
+      tableName="invitation"
+      columnNames="token_hash"
+      constraintName="invitation_token_hash_key" />
+    <createIndex tableName="invitation" indexName="invitation_organisation_id_idx">
+      <column name="organisation_id" />
+    </createIndex>
+    <sql>
+      ALTER TABLE invitation
+      ADD CONSTRAINT invitation_permission_check
+      CHECK (permission IN ('owner', 'member'));
+    </sql>
+  </changeSet>
+
+  <changeSet author="Defra" id="7">
+    <comment>Append only record of security relevant events.</comment>
+    <createTable tableName="audit_event">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="audit_event_pkey" />
+      </column>
+      <column name="event_type" type="VARCHAR(64)">
+        <constraints nullable="false" />
+      </column>
+      <column name="person_id" type="UUID" />
+      <column name="organisation_id" type="UUID" />
+      <column name="detail" type="JSONB" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addForeignKeyConstraint
+      baseTableName="audit_event"
+      baseColumnNames="person_id"
+      constraintName="audit_event_person_id_fkey"
+      referencedTableName="person"
+      referencedColumnNames="id"
+      onDelete="SET NULL" />
+    <addForeignKeyConstraint
+      baseTableName="audit_event"
+      baseColumnNames="organisation_id"
+      constraintName="audit_event_organisation_id_fkey"
+      referencedTableName="organisation"
+      referencedColumnNames="id"
+      onDelete="SET NULL" />
+    <createIndex tableName="audit_event" indexName="audit_event_created_at_idx">
+      <column name="created_at" />
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

@@ -7,20 +7,38 @@ import headers from './headers.ts'
 import logging from './logging.ts'
 import errors from './errors.ts'
 import views from './views.ts'
+import session from './session.ts'
+import auth from './auth.ts'
+import postgres from './postgres.ts'
 import router from './router.ts'
 import pulse from './pulse.ts'
-import config from '../config.ts'
+import config from '../config/index.ts'
 
 async function registerPlugins (server: Server): Promise<void> {
   const plugins: any[] = [
     Inert,
-    Crumb,
     Scooter,
     csp,
     logging,
     errors,
     headers,
     views,
+    postgres,
+    // yar must come before auth: bell reads the OIDC nonce out of request.yar.
+    session,
+    auth,
+    {
+      plugin: Crumb,
+      options: {
+        key: 'crumb',
+        cookieOptions: {
+          isSecure: config.get('cookie.isSecure'),
+          isHttpOnly: true,
+          isSameSite: 'Lax',
+          path: '/'
+        }
+      }
+    },
     router,
     pulse
   ]

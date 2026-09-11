@@ -1,0 +1,94 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+
+{% set pageTitle = 'Create a farming business' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors %}
+        {{ govukErrorSummary({ titleText: "There is a problem", errorList: errors.errorList }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">Create a farming business</h1>
+      <p class="govuk-body">You will be the owner of this business and can invite other people to it.</p>
+
+      <form method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+
+        {{ govukInput({
+          label: { text: "Business name" },
+          id: "name",
+          name: "name",
+          value: values.name,
+          errorMessage: errors.fields.name if errors
+        }) }}
+
+        {{ govukInput({
+          label: { text: "Single business identifier (SBI)" },
+          hint: { text: "This is 9 numbers, for example 123456789" },
+          id: "sbi",
+          name: "sbi",
+          inputmode: "numeric",
+          classes: "govuk-input--width-10",
+          value: values.sbi,
+          errorMessage: errors.fields.sbi if errors
+        }) }}
+
+        <h2 class="govuk-heading-m">Business address (optional)</h2>
+
+        {{ govukInput({
+          label: { text: "Address line 1" },
+          id: "addressLine1",
+          name: "addressLine1",
+          autocomplete: "address-line1",
+          value: values.addressLine1,
+          errorMessage: errors.fields.addressLine1 if errors
+        }) }}
+
+        {{ govukInput({
+          label: { text: "Address line 2" },
+          id: "addressLine2",
+          name: "addressLine2",
+          autocomplete: "address-line2",
+          value: values.addressLine2,
+          errorMessage: errors.fields.addressLine2 if errors
+        }) }}
+
+        {{ govukInput({
+          label: { text: "Town or city" },
+          id: "town",
+          name: "town",
+          classes: "govuk-!-width-two-thirds",
+          autocomplete: "address-level2",
+          value: values.town,
+          errorMessage: errors.fields.town if errors
+        }) }}
+
+        {{ govukInput({
+          label: { text: "County" },
+          id: "county",
+          name: "county",
+          classes: "govuk-!-width-two-thirds",
+          value: values.county,
+          errorMessage: errors.fields.county if errors
+        }) }}
+
+        {{ govukInput({
+          label: { text: "Postcode" },
+          id: "postcode",
+          name: "postcode",
+          classes: "govuk-input--width-10",
+          autocomplete: "postal-code",
+          value: values.postcode,
+          errorMessage: errors.fields.postcode if errors
+        }) }}
+
+        {{ govukButton({ text: "Create business" }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

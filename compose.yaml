@@ -1,22 +1,74 @@
 services:
-  hapi-template-ts:
-    profiles:
-      - app
-    build:
-      context: .
-      target: development
+  postgres:
+    image: postgres:16.6
     ports:
-      - '3000:3000'
-      - '9229:9229'
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: farming_accounts
     volumes:
-      - ./src:/home/node/src
-      - ./package.json:/home/node/package.json
-    env_file:
-      - .env
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - hapi-template-ts
+      - govuk-one-login-example
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d farming_accounts']
+      interval: 10s
+      retries: 5
+      start_period: 1s
+      timeout: 10s
+
+  liquibase:
+    image: liquibase/liquibase:4
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./changelog:/liquibase/changelog
+    networks:
+      - govuk-one-login-example
+    command: --url=jdbc:postgresql://postgres:5432/farming_accounts --username=postgres --password=postgres --changelog-file=changelog/db.changelog.xml update
+
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - govuk-one-login-example
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      retries: 5
+      start_period: 1s
+      timeout: 10s
+
+  # Stands in for GOV.UK One Login. Runs on 3005 so it does not clash with the app on 3000.
+  one-login-simulator:
+    image: ghcr.io/govuk-one-login/simulator:latest
+    ports:
+      - '3005:3005'
+    environment:
+      PORT: 3005
+      SIMULATOR_URL: http://localhost:3005
+      INTERACTIVE_MODE: 'true'
+      CLIENT_ID: ${ONE_LOGIN_CLIENT_ID:-farming-business-service}
+      PUBLIC_KEY: ${ONE_LOGIN_PUBLIC_KEY:?run npm run keys:generate}
+      SCOPES: openid,email
+      REDIRECT_URLS: http://localhost:3000/auth/callback
+      POST_LOGOUT_REDIRECT_URLS: http://localhost:3000/signed-out
+      ID_TOKEN_SIGNING_ALGORITHM: ES256
+      CLIENT_LOCS: P0
+      IDENTITY_VERIFICATION_SUPPORTED: 'false'
+    networks:
+      - govuk-one-login-example
 
 networks:
-  hapi-template-ts:
+  govuk-one-login-example:
     driver: bridge
-    name: hapi-template-ts
+    name: govuk-one-login-example
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,26 +1,24 @@
-import { describe, test, expect, beforeEach, afterEach } from 'vitest'
-import type { Server } from '@hapi/hapi'
-import { createServer } from '../../src/server.ts'
+import { describe, test, expect, beforeAll, afterAll } from 'vitest'
+import { TestClient } from './helpers/test-client.ts'
 
-describe('health test', () => {
-  let server: Server
+describe('health', () => {
+  let client: TestClient
 
-  beforeEach(async () => {
-    server = await createServer()
-    await server.initialize()
+  beforeAll(async () => {
+    client = await TestClient.create()
   })
 
-  test('GET /healthy route returns 200', async () => {
-    const response = await server.inject({ method: 'GET', url: '/healthy' })
+  afterAll(async () => {
+    await client.stop()
+  })
+
+  test('GET /healthy returns 200 without signing in', async () => {
+    const response = await client.inject({ method: 'GET', url: '/healthy' })
     expect(response.statusCode).toBe(200)
   })
 
-  test('GET /healthz route returns 200', async () => {
-    const response = await server.inject({ method: 'GET', url: '/healthz' })
+  test('GET /healthz returns 200 without signing in', async () => {
+    const response = await client.inject({ method: 'GET', url: '/healthz' })
     expect(response.statusCode).toBe(200)
-  })
-
-  afterEach(async () => {
-    await server.stop()
   })
 })

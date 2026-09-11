@@ -3,7 +3,14 @@ import type { ServerRoute } from '@hapi/hapi'
 const route: ServerRoute = {
   method: 'GET',
   path: '/',
-  handler: (_request, h) => {
+  options: {
+    auth: { mode: 'try' }
+  },
+  handler: (request, h) => {
+    if (request.auth.isAuthenticated) {
+      return h.redirect('/organisations')
+    }
+
     return h.view('home')
   }
 }

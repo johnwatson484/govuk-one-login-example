@@ -1,0 +1,60 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+{% set pageTitle = 'Invite someone to ' + organisation.name %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors %}
+        {{ govukErrorSummary({ titleText: "There is a problem", errorList: errors.errorList }) }}
+      {% endif %}
+
+      <span class="govuk-caption-l">{{ organisation.name }}</span>
+      <h1 class="govuk-heading-l">Invite someone to this business</h1>
+
+      <form method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+
+        {{ govukInput({
+          label: { text: "Email address" },
+          hint: { text: "They must use this email address on their GOV.UK One Login details" },
+          id: "email",
+          name: "email",
+          type: "email",
+          spellcheck: false,
+          value: values.email,
+          errorMessage: errors.fields.email if errors
+        }) }}
+
+        {{ govukRadios({
+          name: "permission",
+          fieldset: {
+            legend: { text: "What permission should they have?", classes: "govuk-fieldset__legend--m" }
+          },
+          items: [
+            {
+              value: "member",
+              text: "Member",
+              hint: { text: "Can see the business details and the people linked to it" },
+              checked: values.permission == "member"
+            },
+            {
+              value: "owner",
+              text: "Owner",
+              hint: { text: "Can do everything a member can, and invite other people" },
+              checked: values.permission == "owner"
+            }
+          ],
+          errorMessage: errors.fields.permission if errors
+        }) }}
+
+        {{ govukButton({ text: "Send invitation" }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

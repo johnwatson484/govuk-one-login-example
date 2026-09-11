@@ -1,30 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
+{% set cspNonce = nonce %}
 
-  <head>
-    <meta charset="UTF-8">
-    <title>{{ appName }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="{{ assetPath }}/favicon.ico"/>
-    <link href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet" >
-    <link href="{{ assetPath }}/site.css" rel="stylesheet"/>
-  </head>
+{% extends "govuk/template.njk" %}
 
-  <body>
-    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
-      <div class="navbar-brand">
-        <a class="navbar-item" href="/">
-          {{ appName }}
-        </a>
-      </div>
-    </nav>
-    <div class="container">
-      {% block content %}
-      {% endblock %}
-    </div>
-    {% block bodyEnd %}
-      <script src="{{ assetPath }}/application.js"></script>
-    {% endblock %}
-  </body>
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
 
-</html>
+{% block pageTitle %}{% if errors %}Error: {% endif %}{% if pageTitle and pageTitle != serviceName %}{{ pageTitle }} - {% endif %}{{ serviceName }} - GOV.UK{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{{ assetPath }}/govuk-frontend.min.css">
+  <link rel="stylesheet" href="{{ assetPath }}/site.css">
+{% endblock %}
+
+{% block govukServiceNavigation %}
+  {{ govukServiceNavigation({
+    serviceName: serviceName,
+    serviceUrl: "/",
+    navigation: navigation
+  }) }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukPhaseBanner({
+    tag: { text: "Alpha" },
+    html: 'This is an example service. It is not a real way to manage a farming business.'
+  }) }}
+  {% if backLink %}
+    {{ govukBackLink({ href: backLink, text: "Back" }) }}
+  {% endif %}
+{% endblock %}
+
+{% block bodyEnd %}
+  <script type="module" nonce="{{ cspNonce }}">
+    import { initAll } from '{{ assetPath }}/govuk-frontend.min.js'
+    initAll()
+  </script>
+{% endblock %}

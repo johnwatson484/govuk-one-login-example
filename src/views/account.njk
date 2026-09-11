@@ -1,0 +1,46 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+
+{% set pageTitle = 'Your details' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Your details</h1>
+
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Name" }, value: { text: person.givenName + " " + person.familyName } },
+          { key: { text: "Email address" }, value: { text: person.email } },
+          { key: { text: "Telephone number" }, value: { text: person.telephone or "Not provided" } },
+          { key: { text: "GOV.UK One Login email" }, value: { text: signInEmail or "Not provided" } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-m">Your businesses and permissions</h2>
+
+      {% if organisations.length %}
+        <dl class="govuk-summary-list">
+          {% for organisation in organisations %}
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">
+                <a class="govuk-link" href="/organisations/{{ organisation.id }}">{{ organisation.name }}</a>
+              </dt>
+              <dd class="govuk-summary-list__value">
+                {% if organisation.permission == "owner" %}
+                  {{ govukTag({ text: "Owner" }) }}
+                {% else %}
+                  {{ govukTag({ text: "Member", classes: "govuk-tag--grey" }) }}
+                {% endif %}
+              </dd>
+            </div>
+          {% endfor %}
+        </dl>
+      {% else %}
+        <p class="govuk-body">You are not linked to any businesses yet.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

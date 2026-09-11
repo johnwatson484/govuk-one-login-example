@@ -1,0 +1,39 @@
+{% extends '_layout.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set pageTitle = 'Check your answers' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Check your answers</h1>
+
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "Name" },
+            value: { text: values.givenName + " " + values.familyName },
+            actions: { items: [{ href: "/register/your-name", text: "Change", visuallyHiddenText: "name" }] }
+          },
+          {
+            key: { text: "Email address" },
+            value: { text: values.email },
+            actions: { items: [{ href: "/register/contact-details", text: "Change", visuallyHiddenText: "email address" }] }
+          },
+          {
+            key: { text: "Telephone number" },
+            value: { text: values.telephone or "Not provided" },
+            actions: { items: [{ href: "/register/contact-details", text: "Change", visuallyHiddenText: "telephone number" }] }
+          }
+        ]
+      }) }}
+
+      <form method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}">
+        {{ govukButton({ text: "Accept and continue" }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

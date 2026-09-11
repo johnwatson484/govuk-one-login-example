@@ -10,6 +10,14 @@ const plugin: Plugin<ServerOptions> = {
       if (response instanceof Boom) {
         const statusCode = response.output.statusCode
 
+        if (statusCode === 401) {
+          return h.redirect('/auth/sign-in').takeover()
+        }
+
+        if (statusCode === 403) {
+          return h.view('403').code(statusCode)
+        }
+
         if (statusCode === 404) {
           return h.view('404').code(statusCode)
         }
